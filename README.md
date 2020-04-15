@@ -14,11 +14,11 @@ Use `style.py` to transfer style into a photo (don't forget to dowload pretraine
 - `directory` : Directory where result image would be saved.
 - `name` : Name of result image.
 - `weight_function` : Type of function, that would be used for finding weight matrix.
-           Possible values: _patch_ -- simple patch method;
-            _moving_patch_ -- moving patch method;
-            _superpixel_ -- superpixel method;
-            _segmentation_ -- segmentation method;
-            _gatys_ -- standard Gatys algorithm.
+           Possible values: _patch_ &mdash; simple patch method;
+            _moving_patch_ &mdash; moving patch method;
+            _superpixel_ &mdash; superpixel method;
+            _segmentation_ &mdash; segmentation method;
+            _gatys_ &mdash; standard Gatys algorithm.
 
 -  `contrast` : Contrast coefficient, optional parameter. Default value equal to one.
       Bigger value means, that front object will have bigger values in weight matrix.
