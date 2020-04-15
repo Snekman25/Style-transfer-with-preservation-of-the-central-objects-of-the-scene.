@@ -47,3 +47,4 @@ You will need the following to run the above:
 Need to add different exmples of algorithm work. Were people could see difference on different pictures.
 
 ## Add author section
+## Add info about segmentation pipeline
