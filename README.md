@@ -27,7 +27,10 @@ Use `style.py` to transfer style into a photo (don't forget to dowload pretraine
 
 Example usage:
 
-    python style.py Images/content.jpg Images/style.jpg /report/ Stylization segmentation
+    python style.py .\Images\content.jpg .\Images\style.jpg .\report\ Stylization segmentation
+
+    
+    
 
 
 
