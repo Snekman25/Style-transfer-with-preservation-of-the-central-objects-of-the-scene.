@@ -641,7 +641,7 @@ def compute_segmenation_weight(img_path, img_width, img_height, contrast = 1):
         
     valid_transforms = compose([pre_transforms(), post_transforms()])
     model = smp.FPN(encoder_name="resnext101_32x8d", classes=1)
-    model.load_state_dict(torch.load(f'./segmentation/model.pth'))
+    model.load_state_dict(torch.load(f'./models/model.pth'))
     model.eval()
     
     image = {'image':utils.imread(img_path)}
