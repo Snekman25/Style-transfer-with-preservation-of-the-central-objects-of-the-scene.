@@ -8,7 +8,7 @@ Add styles from famous paintings to any photo with preservation of the central o
 ## Documentation
 
 ### Stylizing photo
-Use `style.py` to transfer style into a photo. Run `python style.py -h` to view all the possible parameters or you can see them below
+Use `style.py` to transfer style into a photo (don't forget to dowload pretrained models). Run `python style.py -h` to view all the possible parameters or you can see them below
 - `img_path` : Path to content image.
 - `style_img_path` : Path to style image.
 - `directory` : Directory where result image would be saved.
@@ -35,6 +35,7 @@ Example usage:
 
 ### Requirements
 You will need the following to run the above:
+ - Dowload pretrained [segmentation model](https://yadi.sk/d/hcNhRltixuxIVw) and [vgg19 model](https://yadi.sk/d/yxJrNraRcujGCA) and put them to models directory.
  - [pytorch](https://github.com/pytorch/pytorch)
  - [segmentation_models_pytorch](https://github.com/qubvel/segmentation_models.pytorch)
  - [plotly](https://github.com/plotly/plotly.py)
