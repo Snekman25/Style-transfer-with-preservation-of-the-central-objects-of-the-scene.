@@ -22,8 +22,8 @@ Use `style.py` to transfer style into a photo (don't forget to dowload pretraine
 
 -  `contrast` : Contrast coefficient, optional parameter. Default value equal to one.
       Bigger value means, that front object will have bigger values in weight matrix.
--  `img_size` : Minimal size side of resulting picture, optional parameter.
--  `grid_size` : Size of grid grid_size x grid_size, optional parameter.
+-  `img_size` : Minimal size side of resulting picture, optional parameter. Bigger size require a lot of GPU memory.
+-  `grid_size` : Size of grid grid_size x grid_size for patch and moving patch methods, optional parameter.
 
 Example usage:
 
@@ -53,5 +53,5 @@ You will need the following to run the above:
 
 You can see at the picture above stylization algorithm with different weight matrix. All this images were made with contrast coefficient 10. That should help to see difference between selected region. Segmentation method gives the best results on every picture. 
 
-## Add author section
-## Add info about segmentation pipeline
+## Segmentation
+In segmentation folder you can find notebook with training segmentation model on [this](https://github.com/victorkitov/BF_Style/tree/master/dataset) dataset.
