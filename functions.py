@@ -1,15 +1,3 @@
-#import time
-#import shutil
-#from collections import OrderedDict, namedtuple
-#import plotly
-#import os
-#import sys
-#import os.path 
-#import glob
-#from shutil import copyfile
-#from tqdm import tqdm
-#import torchvision
-
 import base64
 
 import torch
