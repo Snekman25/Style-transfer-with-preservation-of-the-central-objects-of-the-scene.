@@ -51,5 +51,7 @@ You will need the following to run the above:
 <img src = 'Images/github_pic_2.jpg'>
 </p>
 
+You can see at the picture above stylization algorithm with different weight matrix. All this images were made with contrast coefficient 10. That should help to see difference between selected region. Segmentation method gives the best results on every picture. 
+
 ## Add author section
 ## Add info about segmentation pipeline
