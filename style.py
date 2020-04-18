@@ -2,7 +2,6 @@ import argparse
 import warnings
 warnings.filterwarnings("ignore")
 
-from functions import *
 
 parser = argparse.ArgumentParser(
     description='Style transfer with preservation of the central objects of the scene'
@@ -40,7 +39,8 @@ parser.add_argument(
 
 args = parser.parse_args()
                     
-
+from functions import *
+    
 stylization(
     img_path = args.img_path,
     style_img_path = args.style_img_path,
