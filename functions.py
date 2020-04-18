@@ -1,27 +1,18 @@
-import base64
-
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import optim
-
 from torchvision import transforms
 from torchvision.models import vgg19
-
 import pandas as pd
 import numpy as np
-import cv2
 
 from PIL import Image
 from skimage.transform import resize
-
 from skimage.util import img_as_float
 from skimage import io
 from skimage.segmentation import slic
-
-import plotly.graph_objs as go
-from plotly.offline import plot, iplot
 
 import albumentations as albu
 from albumentations.pytorch import ToTensor
@@ -29,7 +20,6 @@ from catalyst import utils
 import segmentation_models_pytorch as smp
 
 
-# pre and post processing for images
 def prepare_image(img, img_size = (224, 224)):
     """
     Function, that transform image to tensor, that needed for 
@@ -56,38 +46,6 @@ def prepare_image(img, img_size = (224, 224)):
     img_torch = Variable(imgs_torch.unsqueeze(0).cuda()) 
     return img_torch
 
-def plot_distribution(img_path):
-    """
-    Function draw class distribution  for image
-    Parameters:
-    -----------
-    img_path : str
-        Path to input picture.
-
-    """
-    img = Image.open(img_path)
-    img_width, img_height = img.size
-    img = prepare_image(img = img)
-    model = vgg19(pretrained=True).cuda().eval() 
-    predict = model.forward(img)
-    predict = predict.detach().cpu().numpy().reshape(-1)
-    
-    label = pd.read_csv('./label.csv', sep = ';', index_col=0)
-    label['predict'] = predict
-    label.sort_values(by = 'predict', inplace = True)
-    trace = go.Bar(x = [str(i) + '_' + j for i, j in enumerate(label.label)], y = label.predict)
-    l = go.Layout(
-        title = 'Class distribution',
-        xaxis = dict(
-            title = 'Class'
-        ),
-        yaxis = dict(
-            title = 'Score'
-        )
-    )
-    fig = go.Figure(data = [trace], layout = l)
-    iplot(fig)
-    
 def create_tensor(x, mean, v_shift, h_shift, grid_size, mask_height = 28, mask_width = 28):
     """
     Function create list of tensors with different region droped. 
@@ -131,132 +89,6 @@ def create_tensor(x, mean, v_shift, h_shift, grid_size, mask_height = 28, mask_w
                             max(0, j*size - h_shift) : min((j+1)*size - h_shift, mask_width)] = mean
                 result += [new_x]
     return result
-
-def visual_importance(scale_factor, patch_size, img_path, name, mean, save_as_pic = False):
-    """
-    Function draw importance distribution on image.
-    Parameters:
-    -----------
-    scale_factor : int
-        How match compress image from zero to one.
-    patch_size : int 
-        Size of patch, should be dividers of 28.
-    img_path : str
-        Path to input picture.
-    name : str
-        Name of result picture, that would be saved in report directory.
-    mean : bool
-        How we should erase pixels? If False then erase by zero, else by mean.
-    save_as_pic : bool
-        Should we save image as picture or plot as figure.
-        If True, than save as picture in report directory.
-    """
-    img = Image.open(img_path)
-    img_width, img_height = img.size
-    img = prepare_image(img)
-    
-    model = eval_importance().cuda()
-    res = model.forward(img, 0, 0, 28//patch_size, mean)
-    importance = np.array([float(torch.norm(res[0] - res[k + 1])) for k in range((28//patch_size)**2)])    
-
-    shapes = []
-    for i in range(28 // patch_size):
-        for j in range(28 // patch_size):
-            k = (28 // patch_size) * i + j
-            shapes += [
-                {
-                    'type': 'rect',
-                    'x0': j * img_width*scale_factor / (28 // patch_size),
-                    'y0': ((28 // patch_size) - 1 - i) * img_height * scale_factor / (28 // patch_size),
-                    'x1': (j + 1) * img_width*scale_factor / (28 // patch_size),
-                    'y1': ((28 // patch_size) - i) * img_height * scale_factor / (28 // patch_size),
-                    'line': {
-                        'color': 'white' ,
-                        'width': 2,
-                    },
-                    'fillcolor': 'rgba(255, 255, 255,' + str(0.8 * importance[k] / importance.max()) + ')'
-                }
-            ]
-    
-    with open(img_path, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode()
-    #add the prefix that plotly will want when using the string as source
-    encoded_image = "data:image/png;base64," + encoded_string
-
-    layout = go.Layout(
-        shapes = shapes,
-        xaxis = go.layout.XAxis(
-            visible = False,
-            range = [0, img_width*scale_factor]),
-        yaxis = go.layout.YAxis(
-            visible=False,
-            range = [0, img_height*scale_factor],
-            # the scaleanchor attribute ensures that the aspect ratio stays constant
-            scaleanchor = 'x'),
-        width = img_width*scale_factor,
-        height = img_height*scale_factor,
-        margin = {'l': 0, 'r': 0, 't': 0, 'b': 0},
-        images = [dict(
-            x=0,
-            sizex=img_width*scale_factor,
-            y=img_height*scale_factor,
-            sizey=img_height*scale_factor,
-            xref="x",
-            yref="y",
-            opacity=1.0,
-            layer="below",
-            sizing="stretch",
-            source=encoded_image
-        )]
-    )
-
-    # we add a scatter trace with data points in opposite corners to give the Autoscale feature a reference point
-    fig = go.Figure(data=[{
-        'x': [0, img_width * scale_factor], 
-        'y': [0, img_height * scale_factor], 
-        'mode': 'markers',
-        'marker': {'opacity': 0}}
-        ],layout = layout
-        )
-    if save_as_pic:
-        fig.write_image(f'./report/pictures/{name}_{patch_size}.png')
-    else:
-        iplot(fig)
-
-def compare_batch_size(img_path, name, mean = False, patch_sizes = [14, 7, 4, 2, 1]):
-    """
-    Function allows compare different patch sizes in terms of important
-    
-    Parameters:
-    ----------
-    img_path : str
-        Path to input picture
-    name : str
-        Name of result picture, that would be saved in report directory
-    mean : bool
-        How we should erase pixels? If False then erase by zero, else by mean. 
-    patch_sizes : list
-        List of patch sizes. Every patch size should be dividers of 28.
-    """
-    for patch_size in patch_sizes:
-         visual_importance(
-             scale_factor = 1,
-             patch_size = patch_size,
-             img_path = img_path,
-             name = name,
-             mean = mean,
-             save_as_pic = True
-         )
-    
-    img = cv2.imread(img_path)
-    
-    for patch_size in patch_sizes:
-        img = np.concatenate(
-            (img, cv2.imread(f"./report/pictures/{name}_{patch_size}.png")),
-            axis = 1
-        )
-    img = Image.fromarray(img[:, :, ::-1], 'RGB')
-    img.save(f'./report/{name}.png')
     
 # VGG network for content and style loss calculation 
 class VGG(nn.Module):
@@ -376,7 +208,6 @@ def compute_weight_simple(img, img_path, grid_size, img_width, img_height, mean)
     w = torch.from_numpy(w).cuda().float()
     return w
 
-
 def compute_weight(img, img_path, grid_size, contrast, img_width, img_height, mean):
     """
     Function calculate weight matrix for content loss using moving patch method
@@ -475,7 +306,6 @@ class eval_importance(torch.nn.Module):
 
         return result
     
-            
 def create_superpixel_tensor(x, segments, mask_height = 224, mask_width = 224):
     """
     Function create list of tensors, that splited by superpixels.
@@ -548,7 +378,6 @@ class eval_superpixel_importance(torch.nn.Module):
         del x, xx, mask, segments
         return result
     
-
 def compute_superpixel_weight(img, img_path, img_width, img_height, contrast = 1):
     """
     Function calculate weight matrix for content loss using superpixel method
@@ -659,8 +488,7 @@ def postp(tensor):
     t[t<0] = 0
     img = postpb(t)
     return img
- 
- 
+  
 def stylization(img_path, style_img_path, directory, name, weight_function, contrast = 1, img_size = 640, grid_size = 4):
     """
     Function, that make stylization of pic_path with style_pic_path.
