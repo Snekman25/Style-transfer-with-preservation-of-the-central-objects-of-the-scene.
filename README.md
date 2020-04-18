@@ -47,7 +47,9 @@ You will need the following to run the above:
  - Nvidia GPU. All results were produced on the video card NVIDIA RTX 2080 super with 8GB memory.
  
 ## Examples
-Need to add different exmples of algorithm work. Were people could see difference on different pictures.
+<p align = 'center'>
+<img src = 'Images/github_pic_2.jpg'>
+</p>
 
 ## Add author section
 ## Add info about segmentation pipeline
