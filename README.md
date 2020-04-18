@@ -30,14 +30,9 @@ Example usage:
     python style.py .\Images\content.jpg .\Images\style.jpg .\report\ Stylization segmentation
 
     
-    
-
-
-
-
 
 ### Requirements
-You will need the following to run the above:
+You will need the following to run code:
  - Dowload pretrained [segmentation model](https://yadi.sk/d/hcNhRltixuxIVw) and [vgg19 model](https://yadi.sk/d/yxJrNraRcujGCA) and put them to models directory.
  - [pytorch](https://github.com/pytorch/pytorch)
  - [segmentation_models_pytorch](https://github.com/qubvel/segmentation_models.pytorch)
