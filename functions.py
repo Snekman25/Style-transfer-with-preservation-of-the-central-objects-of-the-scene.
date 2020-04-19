@@ -170,7 +170,7 @@ def weighted_mse(y, target, w):
     loss = w * (y - target) ** 2
     return loss.mean()
 
-def compute_weight_simple(img, img_path, grid_size, img_width, img_height, mean):
+def compute_weight_simple(img, img_path, grid_size, contrast, img_width, img_height, mean):
     """
     Function calculate simple weight matrix for content loss
     Параметры:
@@ -203,9 +203,10 @@ def compute_weight_simple(img, img_path, grid_size, img_width, img_height, mean)
             k += 1
     w = resize(w[0,0,:,:], (img_height, img_width), preserve_range  = True)[np.newaxis, np.newaxis, :, :]
 
-        
     w = w  / w.sum() * img_width * img_height
-    w = torch.from_numpy(w).cuda().float()
+    # Increase contrast
+    wn = np.clip(contrast*(w - w.mean()) + w.mean(), 1e-1, w.sum())
+    w = torch.from_numpy(wn.copy()).cuda().float()
     return w
 
 def compute_weight(img, img_path, grid_size, contrast, img_width, img_height, mean):
@@ -256,6 +257,7 @@ def compute_weight(img, img_path, grid_size, contrast, img_width, img_height, me
     wn = np.clip(contrast*(w - w.mean()) + w.mean(), 1e-1, w.sum())
 #     wn = wn / wn.sum() * w.sum()
     w = torch.from_numpy(wn.copy()).cuda().float()
+
     return w
 
 class eval_importance(torch.nn.Module):
@@ -583,7 +585,7 @@ def stylization(img_path, style_img_path, directory, name, weight_function, cont
     
     if weight_function == 'patch':
         w = compute_weight_simple(
-            img, img_path, grid_size, 
+            img, img_path, grid_size, contrast,
             content_targets[0].shape[3], content_targets[0].shape[2], False
         )
     elif weight_function == 'moving_patch':
